@@ -5,8 +5,21 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# 監視対象のディレクトリ（サブディレクトリも含めて再帰的に監視します）
-WATCH_DIR = Path("./target_folder")
+
+def resolve_watch_dir() -> Path:
+    """監視先を実行環境に合わせて決める。
+
+    Windows ではエクスプローラで選択されていた
+    ボリューム (D:)\\vaults\\markov を監視する。
+    この Linux 環境には D: も \\\\192.168.1.17 も無いので、
+    スクリプトと同じ場所の target_folder を使う。
+    """
+    if os.name == "nt":
+        return Path(r"D:\vaults\markov")
+    return Path(__file__).resolve().parent / "target_folder"
+
+
+WATCH_DIR = resolve_watch_dir()
 
 class FileRenameHandler(FileSystemEventHandler):
     def on_created(self, event):
@@ -79,7 +92,7 @@ def main():
     event_handler = FileRenameHandler()
     observer = Observer()
     
-    # recursive=True を指定することで、target_folder 配下のすべてのサブディレクトリを再帰的に監視します
+    # recursive=True を指定することで、監視先配下のすべてのサブディレクトリを再帰的に監視します
     observer.schedule(event_handler, path=str(WATCH_DIR), recursive=True)
     
     print(f"フォルダの再帰的監視を開始します: {WATCH_DIR.resolve()}")
