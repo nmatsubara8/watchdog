@@ -5,8 +5,9 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# 監視対象のディレクトリ（サブディレクトリも含めて再帰的に監視します）
-WATCH_DIR = Path("./target_folder")
+# 監視対象。スクリプトと同じ場所の target_folder。
+# この環境では /workspace/target_folder になる。
+WATCH_DIR = Path(__file__).resolve().parent / "target_folder"
 
 class FileRenameHandler(FileSystemEventHandler):
     def on_created(self, event):
